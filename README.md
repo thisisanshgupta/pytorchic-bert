@@ -46,5 +46,3 @@ python pretrain.py \
     --max_len 512 \
     --max_pred 20 \
     --mask_prob 0.15
-
-
