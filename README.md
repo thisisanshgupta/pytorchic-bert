@@ -1,8 +1,11 @@
 
-# Pytorchic BERT
-This is re-implementation of [Google BERT model](https://github.com/google-research/bert) [[paper](https://arxiv.org/abs/1810.04805)] in Pytorch. I was strongly inspired by [Hugging Face's code](https://github.com/huggingface/pytorch-pretrained-BERT) and I referred a lot to their codes, but I tried to make my codes **more pythonic and pytorchic style**. Actually, the number of lines is less than a half of HF's. 
+# Pytorchic BERT revision and demos
+This is Pytorchic BERT revised version for Google Colab.
 
-(It is still not so heavily tested - let me know when you find some bugs.)
+Refer to [https://github.com/dhlee347/pytorchic-bert](https://github.com/dhlee347/pytorchic-bert) for original source version,<br>
+it is implementation for the paper [Google BERT model](https://arxiv.org/abs/1810.04805).
+
+Refer to troubleshooting [issues](https://github.com/rightlit/pytorchic-bert-rev/issues) while running with original source 
 
 ## Requirements
 
