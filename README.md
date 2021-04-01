@@ -12,6 +12,9 @@ Refer to troubleshooting [issues](https://github.com/rightlit/pytorchic-bert-rev
 Python > 3.6, fire, tqdm, tensorboardx,
 tensorflow (for loading checkpoint file)
 
+## Data
+
+1. Download the [birds](http://www.vision.caltech.edu/visipedia/CUB-200-2011.html) caption data. Extract them to input for pretraining birds corpus data.
 
 ## Example Usage
 
