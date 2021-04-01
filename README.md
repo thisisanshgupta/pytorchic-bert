@@ -46,15 +46,5 @@ python pretrain.py \
     --max_len 512 \
     --max_pred 20 \
     --mask_prob 0.15
-```
-Output (with Toronto Book Corpus):
-```
-cuda (8 GPUs)
-Iter (loss=5.837): : 30089it [18:09:54,  2.17s/it]
-Epoch 1/25 : Average Loss 13.928
-Iter (loss=3.276): : 30091it [18:13:48,  2.18s/it]
-Epoch 2/25 : Average Loss 5.549
-Iter (loss=4.163): : 7380it [4:29:38,  2.19s/it]
-...
-```
+
 
