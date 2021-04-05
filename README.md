@@ -68,7 +68,6 @@ spm.SentencePieceTrainer.Train(cmd)
 
 Usage :
 ```
-# vocab_size = 3765
 !python pretrain.py \
     --train_cfg config/pretrain.json \
     --model_cfg config/bert_base.json \
