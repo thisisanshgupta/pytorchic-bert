@@ -50,6 +50,22 @@ a small bird with a white underbelly and black and white striped crown.
 this is a small brown bird with white eyebroews, and a very small beak.
 ...
 ```
+
+making BERT vocab :
+```
+import sentencepiece as spm
+
+parameter = '--input={} --model_prefix={} --vocab_size={} --user_defined_symbols={}'
+
+input_file = 'birds_corpus.txt'
+vocab_size = 3765
+prefix = 'sentpiece_vocab'
+user_defined_symbols = '[PAD],[UNK],[CLS],[SEP],[MASK]'
+cmd = parameter.format(input_file, prefix, vocab_size,user_defined_symbols)
+
+spm.SentencePieceTrainer.Train(cmd)
+```
+
 Usage :
 ```
 # vocab_size = 3765
