@@ -1,0 +1,7 @@
+label, text_a, text_b
+1,this bird has a bright yellow body, with brown on its crown and wings.,
+1,this bird has a red breast and belly as well as a small bill.,
+1,small, roundish bird with off white breast and belly, light brown crown, brown and black colored wings.,
+1,A white bird with a black crown and yellow beak,
+1,the bird has gray crown, belly and white abdomen, with black tarsus and feet,
+1,a colorful bird with a bright yellow body, a black crown and throat, orange bill, and black primaries and secondaries.,
