@@ -148,8 +148,7 @@ class TokenIndexing(Pipeline):
 
         return (input_ids, segment_ids, input_mask, label_id)
 
-
-class SentEvaluator(nn.Module):
+class Classifier(nn.Module):
     """ Classifier with Transformer """
     def __init__(self, cfg, n_labels):
         super().__init__()
@@ -165,6 +164,16 @@ class SentEvaluator(nn.Module):
         pooled_h = self.activ(self.fc(h[:, 0]))
         logits = self.classifier(self.drop(pooled_h))
         return logits
+
+class SentEvaluator(object):
+    """Training Helper Class"""
+    def __init__(self, cfg, model, data_iter, optimizer, save_dir, device):
+        self.cfg = cfg # config for training : see class Config
+        self.model = model
+        self.data_iter = data_iter # iterator to load data
+        self.optimizer = optimizer
+        self.save_dir = save_dir
+        self.device = device # device name
 
     def load(self, model_file, pretrain_file):
         """ load saved model or pretrained transformer (a part of model) """
@@ -221,10 +230,11 @@ def main(task='mrpc',
     data_iter = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=True)
 
     #model = Classifier(model_cfg, len(TaskDataset.labels))
-    model = SentEvaluator(model_cfg, len(TaskDataset.labels))
+    model = Classifier(model_cfg, len(TaskDataset.labels))
     criterion = nn.CrossEntropyLoss()
 
-    trainer = train.Trainer(cfg,
+    #trainer = train.Trainer(cfg,
+    evaluator = SentEvaluator(cfg,
                             model,
                             data_iter,
                             optim.optim4GPU(cfg, model),
@@ -251,7 +261,7 @@ def main(task='mrpc',
                 accuracy, result = evaluate(model, batch) # accuracy to print
             results.append(result)
             
-        results = trainer.eval(evaluate, model_file, data_parallel)
+        #results = trainer.eval(evaluate, model_file, data_parallel)
         total_accuracy = torch.cat(results).mean().item()
         print('Accuracy:', total_accuracy)
 
