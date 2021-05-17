@@ -67,10 +67,20 @@ class MNLI(CsvDataset):
         for line in itertools.islice(lines, 1, None): # skip header
             yield line[-1], line[8], line[9] # label, text_a, text_b
 
+class SIM(CsvDataset):
+    """ Dataset class for SIM """
+    labels = ("0", "1") # label names
+    def __init__(self, file, pipeline=[]):
+        super().__init__(file, pipeline)
+
+    def get_instances(self, lines):
+        for line in itertools.islice(lines, 1, None): # skip header
+            yield line[0], line[1] # label, text
+
 
 def dataset_class(task):
     """ Mapping from task string to Dataset Class """
-    table = {'mrpc': MRPC, 'mnli': MNLI}
+    table = {'mrpc': MRPC, 'mnli': MNLI, 'sim': SIM}
     return table[task]
 
 
@@ -214,9 +224,9 @@ class SentEvaluator(object):
 #pretrain_file='../uncased_L-12_H-768_A-12/bert_model.ckpt',
 #pretrain_file='../exp/bert/pretrain_100k/model_epoch_3_steps_9732.pt',
 pretrain_file='./pretrain/model_steps_9386.pt',
-data_file='./data/example_dataset.txt'
+#data_file='./data/birds/example_dataset.txt'
 
-def main(task='mrpc',
+def main(task='sim',
          train_cfg='config/train_mrpc.json',
          model_cfg='config/bert_base.json',
          data_file='../glue/MRPC/train.tsv',
