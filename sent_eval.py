@@ -301,12 +301,13 @@ def main(task='sim',
         #print('results:', results)
         print(np.shape(results))
 
-        sim = cosine_similarity(results[0], results[1])
+    similarities = []
+    for svec in results:
+        sim = cosine_similarity(results[0], svec)
         print(sim)
-        sim = cosine_similarity(results[0], results[2])
-        print(sim)
-        sim = cosine_similarity(results[0], results[3])
-        print(sim)
+        similarities.append(sim.cpu().tolist())
+    
+    print(similarities)
 
 if __name__ == '__main__':
     fire.Fire(main)
