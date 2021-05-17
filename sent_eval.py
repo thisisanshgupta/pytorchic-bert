@@ -20,6 +20,7 @@ from utils import set_seeds, get_device, truncate_tokens_pair
 from tqdm import tqdm
 import numpy as np
 from pytorch_pretrained_bert import BertModel
+from torch.autograd import Variable
 
 class CsvDataset(Dataset):
     """ Dataset Class for CSV file """
@@ -185,15 +186,20 @@ class SentEmbedding(nn.Module):
         self.activ = nn.Tanh()
         self.drop = nn.Dropout(cfg.p_drop_hidden)
         #self.classifier = nn.Linear(cfg.dim, n_labels)
+        self.local_pretrained = local_pretrained
 
     def forward(self, input_ids, segment_ids, input_mask):
-        h = self.transformer(input_ids, segment_ids, input_mask)
-        if(local_pretrained):
+        if(self.local_pretrained):
+            h = self.transformer(input_ids, segment_ids, input_mask)
             # only use the first h in the sequence
             pooled_h = self.activ(self.fc(h[:, 0]))
             return pooled_h
         else:
-            return h
+            h, _ = self.transformer(input_ids, segment_ids, input_mask)
+            #print(h.shape)
+            pooled_h = self.activ(self.fc(h))
+            #pooled_h = self.activ(self.fc(h[:, 0]))
+            return pooled_h
 
         #logits = self.classifier(self.drop(pooled_h))
         #return logits
@@ -241,13 +247,11 @@ class SentEvaluator(object):
         for batch in iter_bar:
             batch = [t.to(self.device) for t in batch]
             with torch.no_grad(): # evaluation without gradient calculation
-                #accuracy, result = evaluate(model, batch) # accuracy to print
                 result = evaluate(model, batch) # accuracy to print
             print('eval(batch) : ', result.shape)
             results.append(result)
             #results.append(result.cpu().tolist())
 
-            #iter_bar.set_description('Iter(acc=%5.3f)'%accuracy)
         return results
 
 #pretrain_file='../uncased_L-12_H-768_A-12/bert_model.ckpt',
@@ -292,7 +296,6 @@ def main(task='sim',
 
     #model = Classifier(model_cfg, len(TaskDataset.labels))
     model = SentEmbedding(model_cfg, len(TaskDataset.labels), local_pretrained)
-    #criterion = nn.CrossEntropyLoss()
 
     #trainer = train.Trainer(cfg,
     evaluator = SentEvaluator(cfg,
@@ -305,19 +308,20 @@ def main(task='sim',
         def evaluate(model, batch):
             input_ids, segment_ids, input_mask, label_id = batch
             #logits = model(input_ids, segment_ids, input_mask)
-            embed = model(input_ids, segment_ids, input_mask)
-            #_, label_pred = logits.max(1)
-            #result = (label_pred == label_id).float() #.cpu().numpy()
-            #accuracy = result.mean()
+            if(local_pretrained):
+                embed = model(input_ids, segment_ids, input_mask)
+            else:
+                #input_ids = torch.LongTensor(input_ids)
+                #segment_ids = torch.LongTensor(segment_ids)
+                #input_mask = torch.LongTensor(input_mask)
+                print(np.shape(input_ids), np.shape(segment_ids), np.shape(input_mask))
+                embed = model(input_ids, segment_ids, input_mask)
+
             print('evaluate(embed) : ', embed.shape)
-            #return accuracy, result
             return embed
             
         #results = trainer.eval(evaluate, model_file, data_parallel)
         results = evaluator.eval(evaluate, model_file, data_parallel)
-        #total_accuracy = torch.cat(results).mean().item()
-        #print('Accuracy:', total_accuracy)
-        #print('results:', results)
         print(np.shape(results))
 
     similarities = []
