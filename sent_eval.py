@@ -19,6 +19,7 @@ import train
 from utils import set_seeds, get_device, truncate_tokens_pair
 from tqdm import tqdm
 import numpy as np
+from pytorch_pretrained_bert import BertModel
 
 class CsvDataset(Dataset):
     """ Dataset Class for CSV file """
@@ -172,9 +173,14 @@ def cosine_similarity(x1, x2, dim=1, eps=1e-8):
 #class Classifier(nn.Module):
 class SentEmbedding(nn.Module):
     """ Classifier with Transformer """
-    def __init__(self, cfg, n_labels):
+    def __init__(self, cfg, n_labels, local_pretrained=False):
         super().__init__()
-        self.transformer = models.Transformer(cfg)
+
+        if(local_pretrained):
+            self.transformer = models.Transformer(cfg)
+        else:
+          self.transformer = BertModel.from_pretrained('bert-base-uncased')
+        
         self.fc = nn.Linear(cfg.dim, cfg.dim)
         self.activ = nn.Tanh()
         self.drop = nn.Dropout(cfg.p_drop_hidden)
@@ -190,13 +196,14 @@ class SentEmbedding(nn.Module):
 
 class SentEvaluator(object):
     """Training Helper Class"""
-    def __init__(self, cfg, model, data_iter, optimizer, save_dir, device):
+    def __init__(self, cfg, model, data_iter, optimizer, save_dir, device, local_pretrained):
         self.cfg = cfg # config for training : see class Config
         self.model = model
         self.data_iter = data_iter # iterator to load data
         self.optimizer = optimizer
         self.save_dir = save_dir
         self.device = device # device name
+        self.local_pretrained = local_pretrained # google or local model
 
     def load(self, model_file, pretrain_file):
         """ load saved model or pretrained transformer (a part of model) """
@@ -218,7 +225,9 @@ class SentEvaluator(object):
     def eval(self, evaluate, model_file, data_parallel=True):
         """ Evaluation Loop """
         self.model.eval() # evaluation mode
-        self.load(model_file, None)
+        if(self.local_pretrained):
+            self.load(model_file, None)
+        
         model = self.model.to(self.device)
         if data_parallel: # use Data Parallelism with Multi-GPU
             model = nn.DataParallel(model)
@@ -253,12 +262,16 @@ def main(task='sim',
          save_dir='../exp/bert/mrpc',
          max_len=128,
          batch_size=2,
-         mode='train'):
+         local_pretrained=1,
+         mode_type='pytorchic_model'):
 
     cfg = train.Config.from_json(train_cfg)
     model_cfg = models.Config.from_json(model_cfg)
 
     #set_seeds(cfg.seed)
+
+    if(local_pretrained == 1):
+        local_pretrained = True
 
     tokenizer = tokenization.FullTokenizer(vocab_file=vocab, do_lower_case=True)
     TaskDataset = dataset_class(task) # task dataset class according to the task
@@ -272,7 +285,7 @@ def main(task='sim',
     data_iter = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     #model = Classifier(model_cfg, len(TaskDataset.labels))
-    model = SentEmbedding(model_cfg, len(TaskDataset.labels))
+    model = SentEmbedding(model_cfg, len(TaskDataset.labels), local_pretrained)
     #criterion = nn.CrossEntropyLoss()
 
     #trainer = train.Trainer(cfg,
@@ -280,7 +293,7 @@ def main(task='sim',
                             model,
                             data_iter,
                             optim.optim4GPU(cfg, model),
-                            save_dir, get_device())
+                            save_dir, get_device(), local_pretrained)
 
     if(True):
         def evaluate(model, batch):
