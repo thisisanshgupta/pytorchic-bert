@@ -192,13 +192,24 @@ class SentEvaluator(object):
                         if key.startswith('transformer')}
                 ) # load only transformer parts
 
-    def evaluate(model, batch):
-        input_ids, segment_ids, input_mask, label_id = batch
-        logits = model(input_ids, segment_ids, input_mask)
-        _, label_pred = logits.max(1)
-        result = (label_pred == label_id).float() #.cpu().numpy()
-        accuracy = result.mean()
-        return accuracy, result
+    def eval(self, evaluate, model_file, data_parallel=True):
+        """ Evaluation Loop """
+        self.model.eval() # evaluation mode
+        self.load(model_file, None)
+        model = self.model.to(self.device)
+        if data_parallel: # use Data Parallelism with Multi-GPU
+            model = nn.DataParallel(model)
+
+        results = [] # prediction results
+        iter_bar = tqdm(self.data_iter, desc='Iter (loss=X.XXX)')
+        for batch in iter_bar:
+            batch = [t.to(self.device) for t in batch]
+            with torch.no_grad(): # evaluation without gradient calculation
+                accuracy, result = evaluate(model, batch) # accuracy to print
+            results.append(result)
+
+            iter_bar.set_description('Iter(acc=%5.3f)'%accuracy)
+        return results
 
 #pretrain_file='../uncased_L-12_H-768_A-12/bert_model.ckpt',
 #pretrain_file='../exp/bert/pretrain_100k/model_epoch_3_steps_9732.pt',
@@ -249,19 +260,8 @@ def main(task='mrpc',
             accuracy = result.mean()
             return accuracy, result
             
-        #self.model.eval() # evaluation mode
-        self.load(model_file, None)
-        model = self.model.to(self.device)
-
-        results = [] # prediction results
-        iter_bar = tqdm(self.data_iter, desc='Iter (loss=X.XXX)')
-        for batch in iter_bar:
-            batch = [t.to(self.device) for t in batch]
-            with torch.no_grad(): # evaluation without gradient calculation
-                accuracy, result = evaluate(model, batch) # accuracy to print
-            results.append(result)
-            
         #results = trainer.eval(evaluate, model_file, data_parallel)
+        results = evaluator.eval(evaluate, model_file, data_parallel)
         total_accuracy = torch.cat(results).mean().item()
         print('Accuracy:', total_accuracy)
 
