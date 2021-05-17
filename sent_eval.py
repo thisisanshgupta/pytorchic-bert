@@ -259,7 +259,7 @@ def main(task='sim',
     data_iter = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=True)
 
     #model = Classifier(model_cfg, len(TaskDataset.labels))
-    model = Classifier(model_cfg, len(TaskDataset.labels))
+    model = SentEmbedding(model_cfg, len(TaskDataset.labels))
     #criterion = nn.CrossEntropyLoss()
 
     #trainer = train.Trainer(cfg,
