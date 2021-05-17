@@ -26,8 +26,9 @@ class CsvDataset(Dataset):
         data = []
         with open(file, "r") as f:
             # list of splitted lines : line is also list
-            lines = csv.reader(f, delimiter='\t', quotechar=None)
-            for instance in self.get_instances(lines): # instance : tuple of fields
+            #lines = csv.reader(f, delimiter='\t', quotechar=None)
+            lines = csv.reader(f, delimiter=',', quotechar=None)
+     for instance in self.get_instances(lines): # instance : tuple of fields
                 for proc in pipeline: # a bunch of pre-processing
                     instance = proc(instance)
                 data.append(instance)
