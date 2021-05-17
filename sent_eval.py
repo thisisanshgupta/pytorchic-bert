@@ -76,7 +76,7 @@ class SIM(CsvDataset):
 
     def get_instances(self, lines):
         for line in itertools.islice(lines, 1, None): # skip header
-            yield line[0], line[1] # label, text
+            yield line[0], line[1], '' # label, text
 
 
 def dataset_class(task):
