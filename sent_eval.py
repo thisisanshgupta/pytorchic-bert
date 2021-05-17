@@ -262,15 +262,17 @@ def main(task='sim',
          save_dir='../exp/bert/mrpc',
          max_len=128,
          batch_size=2,
-         local_pretrained=1,
-         mode_type='pytorchic_model'):
+         pretrained_type='local',
+         mode='train'):
 
     cfg = train.Config.from_json(train_cfg)
     model_cfg = models.Config.from_json(model_cfg)
 
     #set_seeds(cfg.seed)
 
-    if(local_pretrained == 1):
+    if(pretrained_type == 'google'):
+        local_pretrained = False
+    else:
         local_pretrained = True
 
     tokenizer = tokenization.FullTokenizer(vocab_file=vocab, do_lower_case=True)
