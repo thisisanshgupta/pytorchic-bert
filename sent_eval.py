@@ -160,7 +160,8 @@ class TokenIndexing(Pipeline):
 
         return (input_ids, segment_ids, input_mask, label_id)
 
-class Classifier(nn.Module):
+#class Classifier(nn.Module):
+class SentEmbedding(nn.Module):
     """ Classifier with Transformer """
     def __init__(self, cfg, n_labels):
         super().__init__()
@@ -168,14 +169,15 @@ class Classifier(nn.Module):
         self.fc = nn.Linear(cfg.dim, cfg.dim)
         self.activ = nn.Tanh()
         self.drop = nn.Dropout(cfg.p_drop_hidden)
-        self.classifier = nn.Linear(cfg.dim, n_labels)
+        #self.classifier = nn.Linear(cfg.dim, n_labels)
 
     def forward(self, input_ids, segment_ids, input_mask):
         h = self.transformer(input_ids, segment_ids, input_mask)
         # only use the first h in the sequence
         pooled_h = self.activ(self.fc(h[:, 0]))
-        logits = self.classifier(self.drop(pooled_h))
-        return logits
+        #logits = self.classifier(self.drop(pooled_h))
+        #return logits
+        return pooled_h
 
 class SentEvaluator(object):
     """Training Helper Class"""
@@ -217,10 +219,11 @@ class SentEvaluator(object):
         for batch in iter_bar:
             batch = [t.to(self.device) for t in batch]
             with torch.no_grad(): # evaluation without gradient calculation
-                accuracy, result = evaluate(model, batch) # accuracy to print
+                #accuracy, result = evaluate(model, batch) # accuracy to print
+                result = evaluate(model, batch) # accuracy to print
             results.append(result)
 
-            iter_bar.set_description('Iter(acc=%5.3f)'%accuracy)
+            #iter_bar.set_description('Iter(acc=%5.3f)'%accuracy)
         return results
 
 #pretrain_file='../uncased_L-12_H-768_A-12/bert_model.ckpt',
@@ -269,16 +272,19 @@ def main(task='sim',
     if(True):
         def evaluate(model, batch):
             input_ids, segment_ids, input_mask, label_id = batch
-            logits = model(input_ids, segment_ids, input_mask)
-            _, label_pred = logits.max(1)
-            result = (label_pred == label_id).float() #.cpu().numpy()
-            accuracy = result.mean()
-            return accuracy, result
+            #logits = model(input_ids, segment_ids, input_mask)
+            embed = model(input_ids, segment_ids, input_mask)
+            #_, label_pred = logits.max(1)
+            #result = (label_pred == label_id).float() #.cpu().numpy()
+            #accuracy = result.mean()
+            #return accuracy, result
+            return embed
             
         #results = trainer.eval(evaluate, model_file, data_parallel)
         results = evaluator.eval(evaluate, model_file, data_parallel)
-        total_accuracy = torch.cat(results).mean().item()
-        print('Accuracy:', total_accuracy)
+        #total_accuracy = torch.cat(results).mean().item()
+        #print('Accuracy:', total_accuracy)
+        print('results:', results)
 
 
 if __name__ == '__main__':
