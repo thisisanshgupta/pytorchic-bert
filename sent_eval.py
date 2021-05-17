@@ -161,6 +161,14 @@ class TokenIndexing(Pipeline):
 
         return (input_ids, segment_ids, input_mask, label_id)
 
+def cosine_similarity(x1, x2, dim=1, eps=1e-8):
+    """Returns cosine similarity between x1 and x2, computed along dim.
+    """
+    w12 = torch.sum(x1 * x2, dim)
+    w1 = torch.norm(x1, 2, dim)
+    w2 = torch.norm(x2, 2, dim)
+    return (w12 / (w1 * w2).clamp(min=eps)).squeeze()
+
 #class Classifier(nn.Module):
 class SentEmbedding(nn.Module):
     """ Classifier with Transformer """
@@ -223,8 +231,8 @@ class SentEvaluator(object):
                 #accuracy, result = evaluate(model, batch) # accuracy to print
                 result = evaluate(model, batch) # accuracy to print
             print('eval(batch) : ', result.shape)
-            #results.append(result)
-            results.append(result.cpu().tolist())
+            results.append(result)
+            #results.append(result.cpu().tolist())
 
             #iter_bar.set_description('Iter(acc=%5.3f)'%accuracy)
         return results
@@ -290,9 +298,15 @@ def main(task='sim',
         results = evaluator.eval(evaluate, model_file, data_parallel)
         #total_accuracy = torch.cat(results).mean().item()
         #print('Accuracy:', total_accuracy)
-        print('results:', results)
+        #print('results:', results)
         print(np.shape(results))
 
+        sim = cosine_similarity(results[0], results[1])
+        print(sim)
+        sim = cosine_similarity(results[0], results[2])
+        print(sim)
+        sim = cosine_similarity(results[0], results[3])
+        print(sim)
 
 if __name__ == '__main__':
     fire.Fire(main)
