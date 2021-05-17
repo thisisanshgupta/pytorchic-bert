@@ -213,13 +213,15 @@ class SentEvaluator(object):
 
 #pretrain_file='../uncased_L-12_H-768_A-12/bert_model.ckpt',
 #pretrain_file='../exp/bert/pretrain_100k/model_epoch_3_steps_9732.pt',
+pretrain_file='./pretrain/model_steps_9386.pt',
+data_file='./data/example_dataset.txt'
 
 def main(task='mrpc',
          train_cfg='config/train_mrpc.json',
          model_cfg='config/bert_base.json',
          data_file='../glue/MRPC/train.tsv',
          model_file=None,
-         pretrain_file='../uncased_L-12_H-768_A-12/bert_model.ckpt',
+         pretrain_file=pretrain_file,
          data_parallel=True,
          vocab='../uncased_L-12_H-768_A-12/vocab.txt',
          save_dir='../exp/bert/mrpc',
@@ -229,7 +231,7 @@ def main(task='mrpc',
     cfg = train.Config.from_json(train_cfg)
     model_cfg = models.Config.from_json(model_cfg)
 
-    set_seeds(cfg.seed)
+    #set_seeds(cfg.seed)
 
     tokenizer = tokenization.FullTokenizer(vocab_file=vocab, do_lower_case=True)
     TaskDataset = dataset_class(task) # task dataset class according to the task
@@ -238,11 +240,12 @@ def main(task='mrpc',
                 TokenIndexing(tokenizer.convert_tokens_to_ids,
                               TaskDataset.labels, max_len)]
     dataset = TaskDataset(data_file, pipeline)
+    # batch_size
     data_iter = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=True)
 
     #model = Classifier(model_cfg, len(TaskDataset.labels))
     model = Classifier(model_cfg, len(TaskDataset.labels))
-    criterion = nn.CrossEntropyLoss()
+    #criterion = nn.CrossEntropyLoss()
 
     #trainer = train.Trainer(cfg,
     evaluator = SentEvaluator(cfg,
