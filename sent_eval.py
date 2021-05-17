@@ -18,6 +18,7 @@ import train
 
 from utils import set_seeds, get_device, truncate_tokens_pair
 from tqdm import tqdm
+import numpy as np
 
 class CsvDataset(Dataset):
     """ Dataset Class for CSV file """
@@ -221,7 +222,9 @@ class SentEvaluator(object):
             with torch.no_grad(): # evaluation without gradient calculation
                 #accuracy, result = evaluate(model, batch) # accuracy to print
                 result = evaluate(model, batch) # accuracy to print
-            results.append(result)
+            print('eval(batch) : ', result.shape)
+            #results.append(result)
+            results.append(result.cpu().tolist())
 
             #iter_bar.set_description('Iter(acc=%5.3f)'%accuracy)
         return results
@@ -277,6 +280,7 @@ def main(task='sim',
             #_, label_pred = logits.max(1)
             #result = (label_pred == label_id).float() #.cpu().numpy()
             #accuracy = result.mean()
+            print('evaluate(embed) : ', embed.shape)
             #return accuracy, result
             return embed
             
@@ -285,6 +289,7 @@ def main(task='sim',
         #total_accuracy = torch.cat(results).mean().item()
         #print('Accuracy:', total_accuracy)
         print('results:', results)
+        print(np.shape(results))
 
 
 if __name__ == '__main__':
