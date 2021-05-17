@@ -188,11 +188,15 @@ class SentEmbedding(nn.Module):
 
     def forward(self, input_ids, segment_ids, input_mask):
         h = self.transformer(input_ids, segment_ids, input_mask)
-        # only use the first h in the sequence
-        pooled_h = self.activ(self.fc(h[:, 0]))
+        if(local_pretrained):
+            # only use the first h in the sequence
+            pooled_h = self.activ(self.fc(h[:, 0]))
+            return pooled_h
+        else:
+            return h
+
         #logits = self.classifier(self.drop(pooled_h))
         #return logits
-        return pooled_h
 
 class SentEvaluator(object):
     """Training Helper Class"""
