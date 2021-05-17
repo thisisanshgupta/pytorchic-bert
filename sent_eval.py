@@ -17,6 +17,7 @@ import optim
 import train
 
 from utils import set_seeds, get_device, truncate_tokens_pair
+from tqdm import tqdm
 
 class CsvDataset(Dataset):
     """ Dataset Class for CSV file """
