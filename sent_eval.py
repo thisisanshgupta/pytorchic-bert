@@ -244,6 +244,7 @@ def main(task='sim',
          vocab='../uncased_L-12_H-768_A-12/vocab.txt',
          save_dir='../exp/bert/mrpc',
          max_len=128,
+         batch_size=2,
          mode='train'):
 
     cfg = train.Config.from_json(train_cfg)
@@ -259,7 +260,8 @@ def main(task='sim',
                               TaskDataset.labels, max_len)]
     dataset = TaskDataset(data_file, pipeline)
     # batch_size
-    data_iter = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=True)
+    #data_iter = DataLoader(dataset, batch_size=cfg.batch_size, shuffle=True)
+    data_iter = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     #model = Classifier(model_cfg, len(TaskDataset.labels))
     model = SentEmbedding(model_cfg, len(TaskDataset.labels))
