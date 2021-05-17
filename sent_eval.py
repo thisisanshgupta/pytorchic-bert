@@ -191,13 +191,23 @@ class SentEmbedding(nn.Module):
     def forward(self, input_ids, segment_ids, input_mask):
         if(self.local_pretrained):
             h = self.transformer(input_ids, segment_ids, input_mask)
+            print(h)
+            print(np.shape(h)) # [1, 64, 768]
             # only use the first h in the sequence
             pooled_h = self.activ(self.fc(h[:, 0]))
             return pooled_h
         else:
+            #input_ids = torch.LongTensor(input_ids)
+            #segment_ids = torch.LongTensor(segment_ids)
+            #input_mask = torch.LongTensor(input_mask)
+            
             h, _ = self.transformer(input_ids, segment_ids, input_mask)
-            #print(h.shape)
-            pooled_h = self.activ(self.fc(h))
+            print(h)
+            print(np.shape(h)) # (12,)
+            print(np.shape(h[0])) # [1,64,768]
+            h0 = h[0]
+            pooled_h = self.activ(self.fc(h0[:,0]))
+            #pooled_h = self.activ(self.fc(h))
             #pooled_h = self.activ(self.fc(h[:, 0]))
             return pooled_h
 
@@ -309,12 +319,14 @@ def main(task='sim',
             input_ids, segment_ids, input_mask, label_id = batch
             #logits = model(input_ids, segment_ids, input_mask)
             if(local_pretrained):
+                print(np.shape(input_ids), np.shape(segment_ids), np.shape(input_mask))
                 embed = model(input_ids, segment_ids, input_mask)
             else:
                 #input_ids = torch.LongTensor(input_ids)
                 #segment_ids = torch.LongTensor(segment_ids)
                 #input_mask = torch.LongTensor(input_mask)
                 print(np.shape(input_ids), np.shape(segment_ids), np.shape(input_mask))
+                print(input_ids.shape, segment_ids.shape, input_mask.shape)
                 embed = model(input_ids, segment_ids, input_mask)
 
             print('evaluate(embed) : ', embed.shape)
