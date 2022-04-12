@@ -1,12 +1,5 @@
 
-# Pytorchic BERT revision and demos
-This is Pytorchic BERT revised version for Google Colab.
-
-Refer to [https://github.com/dhlee347/pytorchic-bert](https://github.com/dhlee347/pytorchic-bert) for original source version,<br>
-it is implementation for the paper [Google BERT model](https://arxiv.org/abs/1810.04805).
-
-Refer to troubleshooting [issues](https://github.com/rightlit/pytorchic-bert-rev/issues) while running with original source 
-
+# Pytorch BERT
 ## Requirements
 
 Python > 3.6, fire, tqdm, tensorboardx,
